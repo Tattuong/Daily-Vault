@@ -60,7 +60,7 @@ class IapRemoteConfig {
 
   static IapRemoteConfig fallback() => const IapRemoteConfig(
         name: 'Daily Vault',
-        id: 'com.dailyvault.app',
+        id: 'com.dailyvaultmng.dailyvault',
         version: '1.0.0',
         billingDisabled: false,
         code: 'FULL_IAP',

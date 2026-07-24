@@ -1,4 +1,4 @@
-package com.dailyvault.app
+package com.dailyvaultmng.dailyvault
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

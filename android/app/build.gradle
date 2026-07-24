@@ -30,7 +30,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.dailyvault.app"
+    namespace = "com.dailyvaultmng.dailyvault"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
 
@@ -45,7 +45,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.dailyvault.app"
+        applicationId = "com.dailyvaultmng.dailyvault"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutterVersionCode.toInteger()
