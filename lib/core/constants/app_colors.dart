@@ -65,3 +65,18 @@ class AppColors {
     Color(0xFF64748B),
   ];
 }
+
+extension AppBrand on BuildContext {
+  Color get brand => Theme.of(this).colorScheme.primary;
+  Color get canvasBg => Theme.of(this).scaffoldBackgroundColor;
+  Color get panel => Theme.of(this).colorScheme.surface;
+
+  LinearGradient get brandGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Theme.of(this).colorScheme.primary,
+          Theme.of(this).colorScheme.secondary,
+        ],
+      );
+}

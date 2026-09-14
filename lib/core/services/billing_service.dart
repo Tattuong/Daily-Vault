@@ -5,11 +5,13 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../constants/iap_constants.dart';
 
-typedef PurchaseCallback = void Function(PurchaseDetails purchase);
+typedef PurchaseCallback = Future<void> Function(PurchaseDetails purchase);
 
 class BillingService {
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
+  PurchaseCallback? _onPurchase;
+  VoidCallback? _onError;
 
   bool isAvailable = false;
   bool isInitialized = false;
@@ -24,6 +26,8 @@ class BillingService {
     required VoidCallback onError,
   }) async {
     if (isInitialized) return;
+    _onPurchase = onPurchase;
+    _onError = onError;
 
     try {
       isAvailable = await _iap.isAvailable();
@@ -37,14 +41,18 @@ class BillingService {
       _subscription = _iap.purchaseStream.listen(
         (purchases) async {
           for (final purchase in purchases) {
-            if (purchase.status == PurchaseStatus.pending) continue;
-
-            if (purchase.status == PurchaseStatus.error) {
-              lastError = purchase.error?.message ?? 'Purchase failed';
-              onError();
-            } else if (purchase.status == PurchaseStatus.purchased ||
-                purchase.status == PurchaseStatus.restored) {
-              onPurchase(purchase);
+            switch (purchase.status) {
+              case PurchaseStatus.pending:
+                break;
+              case PurchaseStatus.error:
+                lastError = purchase.error?.message ?? 'Purchase failed';
+                _onError?.call();
+              case PurchaseStatus.canceled:
+                lastError = null;
+                _onError?.call();
+              case PurchaseStatus.purchased:
+              case PurchaseStatus.restored:
+                await _onPurchase?.call(purchase);
             }
 
             if (purchase.pendingCompletePurchase) {
@@ -54,7 +62,7 @@ class BillingService {
         },
         onError: (Object e) {
           lastError = e.toString();
-          onError();
+          _onError?.call();
         },
       );
 

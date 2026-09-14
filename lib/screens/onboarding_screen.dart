@@ -43,11 +43,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       body: AppDecorations.meshBackground(
-        isDark: isDark,
+        context: context,
         child: SafeArea(
           child: Column(
             children: [
@@ -103,7 +101,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     width: _page == i ? 28 : 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: _page == i ? AppColors.primary : AppColors.surfaceVariant,
+                      color: _page == i ? context.brand : AppColors.surfaceVariant,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),

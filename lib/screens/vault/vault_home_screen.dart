@@ -4,9 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../models/vault_item.dart';
-import '../../providers/shop_provider.dart';
 import '../../providers/vault_provider.dart';
-import '../../widgets/ad_banner_placeholder.dart';
 import '../../widgets/app_ui.dart';
 import '../../widgets/coin_balance_chip.dart';
 import '../../widgets/coin_purchase_sheet.dart';
@@ -19,7 +17,6 @@ class VaultHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vault = context.watch<VaultProvider>();
-    final shop = context.watch<ShopProvider>();
 
     return AppPageScaffold(
       title: AppStrings.t(context, 'homeTitle'),

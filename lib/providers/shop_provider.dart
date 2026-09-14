@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../core/constants/iap_constants.dart';
 import '../core/services/billing_service.dart';
 import '../core/services/iap_config_service.dart';
+import '../core/services/purchase_sync_service.dart';
 import '../core/services/storage_service.dart';
 import '../models/app_theme_preset.dart';
 import '../models/shop_coin_event.dart';
@@ -21,7 +22,7 @@ enum ShopPurchaseResult {
   error,
 }
 
-class ShopProvider extends ChangeNotifier {
+class ShopProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const _coinsKey = 'dv_coins';
   static const _ownedKey = 'dv_owned_items';
   static const _activeThemeKey = 'dv_active_theme';
@@ -51,6 +52,7 @@ class ShopProvider extends ChangeNotifier {
   String? _lastMessage;
   Set<String> _processedPurchaseIds = {};
   ShopCoinEvent? _lastCoinEvent;
+  Timer? _purchaseWatchdog;
 
   int get coins => _coins;
   Set<String> get ownedItems => _ownedItems;
@@ -86,13 +88,14 @@ class ShopProvider extends ChangeNotifier {
     if (_initialized) return;
     _initialized = true;
 
+    WidgetsBinding.instance.addObserver(this);
     await _loadLocal();
     await _configService.fetch();
 
     if (!isBillingDisabled && (Platform.isAndroid || Platform.isIOS)) {
       await _billing.init(
         onPurchase: _handlePurchase,
-        onError: () => notifyListeners(),
+        onError: abortPurchase,
       );
     }
 
@@ -163,12 +166,10 @@ class ShopProvider extends ChangeNotifier {
 
   Future<bool> buyCoinPack(ProductDetails product) async {
     if (isBillingDisabled || !_billing.isAvailable) return false;
-    _isPurchasing = true;
-    _lastMessage = null;
-    notifyListeners();
+    _beginPurchaseUi();
     final ok = await _billing.buyCoinPack(product);
     if (!ok) {
-      _isPurchasing = false;
+      abortPurchase();
       _lastMessage = 'purchaseFailed';
       notifyListeners();
     }
@@ -180,19 +181,42 @@ class ShopProvider extends ChangeNotifier {
       return false;
     }
     if (hasRemoveAds) return false;
-    _isPurchasing = true;
-    _lastMessage = null;
-    notifyListeners();
+    _beginPurchaseUi();
     final ok = await _billing.buyRemoveAds();
     if (!ok) {
-      _isPurchasing = false;
+      abortPurchase();
       _lastMessage = 'purchaseFailed';
       notifyListeners();
     }
     return ok;
   }
 
+  void _beginPurchaseUi() {
+    _isPurchasing = true;
+    _lastMessage = null;
+    _purchaseWatchdog?.cancel();
+    notifyListeners();
+  }
+
+  void abortPurchase() {
+    _purchaseWatchdog?.cancel();
+    _purchaseWatchdog = null;
+    if (!_isPurchasing) return;
+    _isPurchasing = false;
+    notifyListeners();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || !_isPurchasing) return;
+    _purchaseWatchdog?.cancel();
+    _purchaseWatchdog = Timer(const Duration(milliseconds: 1200), abortPurchase);
+  }
+
   Future<void> _handlePurchase(PurchaseDetails purchase) async {
+    _purchaseWatchdog?.cancel();
+    _purchaseWatchdog = null;
+
     final purchaseId = purchase.purchaseID ?? '${purchase.productID}_${purchase.transactionDate}';
     if (_processedPurchaseIds.contains(purchaseId)) {
       _isPurchasing = false;
@@ -217,7 +241,10 @@ class ShopProvider extends ChangeNotifier {
     _isPurchasing = false;
     await _saveLocal();
     notifyListeners();
+    await PurchaseSyncService.instance.enqueueAndSync(purchase);
   }
+
+  Future<void> syncPendingPurchases() => PurchaseSyncService.instance.sync();
 
   Future<bool> claimDailyReward() async {
     final today = _dateKey(DateTime.now());
@@ -335,6 +362,8 @@ class ShopProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _purchaseWatchdog?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _billing.dispose();
     super.dispose();
   }

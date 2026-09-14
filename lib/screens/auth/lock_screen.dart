@@ -7,6 +7,7 @@ import '../../core/constants/app_strings.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vault_provider.dart';
 import '../../widgets/app_toast.dart';
+import '../../widgets/app_ui.dart';
 import '../../widgets/pin_keypad.dart';
 import '../main_shell.dart';
 import '../onboarding_screen.dart';
@@ -171,8 +172,7 @@ class _LockScreenState extends State<LockScreen> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        body: DecoratedBox(
-          decoration: const BoxDecoration(gradient: AppColors.splashGradient),
+        body: ThemedImmersiveBackground(
           child: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -353,8 +353,7 @@ class _SetupPinScreenState extends State<SetupPinScreen> {
         if (!didPop && !widget.isConfirm) _onBack();
       },
       child: Scaffold(
-        body: DecoratedBox(
-          decoration: const BoxDecoration(gradient: AppColors.splashGradient),
+        body: ThemedImmersiveBackground(
           child: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

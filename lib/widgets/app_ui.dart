@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -29,22 +27,24 @@ class AppDecorations {
     required bool isDark,
     double radius = 24,
     CardStyle? skin,
+    Color? brand,
+    Color? surface,
   }) {
     final style = skin ?? CardStyle.defaultStyle;
+    final accent = brand ?? AppColors.primary;
+    final fill = surface ?? (isDark ? AppColors.darkSurface : Colors.white);
     return BoxDecoration(
       borderRadius: BorderRadius.circular(style.borderRadius > 0 ? style.borderRadius : radius),
-      color: style.glassEffect
-          ? (isDark ? AppColors.darkSurface.withValues(alpha: 0.65) : Colors.white.withValues(alpha: 0.72))
-          : (isDark ? AppColors.darkSurface.withValues(alpha: 0.88) : Colors.white.withValues(alpha: 0.94)),
+      color: style.glassEffect ? fill.withValues(alpha: 0.72) : fill.withValues(alpha: 0.96),
       border: Border.all(
         color: style.borderWidth > 0
             ? style.borderColor.withValues(alpha: isDark ? 0.5 : 0.7)
-            : (isDark ? Colors.white : AppColors.primary).withValues(alpha: 0.1),
+            : accent.withValues(alpha: isDark ? 0.28 : 0.16),
         width: style.borderWidth > 0 ? style.borderWidth : 1,
       ),
       boxShadow: [
         BoxShadow(
-          color: (style.borderWidth > 0 ? style.accentColor : AppColors.primary).withValues(alpha: isDark ? 0.14 : 0.07),
+          color: (style.borderWidth > 0 ? style.accentColor : accent).withValues(alpha: isDark ? 0.22 : 0.12),
           blurRadius: 24,
           offset: const Offset(0, 8),
         ),
@@ -53,22 +53,49 @@ class AppDecorations {
   }
 
   static Widget meshBackground({
-    required bool isDark,
+    required BuildContext context,
     required Widget child,
     LinearGradient? backgroundGradient,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brand = context.brand;
+    final secondary = Theme.of(context).colorScheme.secondary;
+    final themeId = context.select<ShopProvider, String>((s) => s.activeThemeId);
+    final header = AppThemePresets.get(themeId).headerGradient;
+    final canvas = context.canvasBg;
+    final wash = backgroundGradient ??
+        LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.lerp(canvas, header.colors.first, isDark ? 0.55 : 0.22)!,
+            canvas,
+            Color.lerp(canvas, header.colors.last, isDark ? 0.4 : 0.16)!,
+          ],
+        );
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (backgroundGradient != null)
-          DecoratedBox(decoration: BoxDecoration(gradient: backgroundGradient))
-        else
-          ColoredBox(color: isDark ? AppColors.darkBackground : AppColors.background),
-        Positioned(top: -100, left: -60, child: GlowOrb(color: AppColors.primary.withValues(alpha: isDark ? 0.3 : 0.18), size: 280)),
-        Positioned(top: 80, right: -80, child: GlowOrb(color: AppColors.accent.withValues(alpha: isDark ? 0.22 : 0.12), size: 220)),
-        Positioned(bottom: 120, left: 40, child: GlowOrb(color: AppColors.accentAlt.withValues(alpha: isDark ? 0.15 : 0.08), size: 180)),
+        DecoratedBox(decoration: BoxDecoration(gradient: wash)),
+        Positioned(top: -100, left: -60, child: GlowOrb(color: brand.withValues(alpha: isDark ? 0.45 : 0.28), size: 280)),
+        Positioned(top: 80, right: -80, child: GlowOrb(color: secondary.withValues(alpha: isDark ? 0.32 : 0.18), size: 220)),
         child,
       ],
+    );
+  }
+}
+
+class ThemedImmersiveBackground extends StatelessWidget {
+  final Widget child;
+
+  const ThemedImmersiveBackground({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeId = context.select<ShopProvider, String>((s) => s.activeThemeId);
+    return DecoratedBox(
+      decoration: BoxDecoration(gradient: AppThemePresets.get(themeId).lockGradient),
+      child: child,
     );
   }
 }
@@ -81,13 +108,14 @@ class GlowOrb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-        child: const SizedBox.expand(),
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)]),
+        ),
       ),
     );
   }
@@ -113,16 +141,17 @@ class AppPageScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final shop = context.watch<ShopProvider>();
-    final preset = shop.activeTheme;
-    final bg = shop.activeBackground;
-    final useShopBg = shop.activeBackgroundId != 'bg_default';
+    final themeId = context.select<ShopProvider, String>((s) => s.activeThemeId);
+    final bgId = context.select<ShopProvider, String>((s) => s.activeBackgroundId);
+    final preset = AppThemePresets.get(themeId);
+    final bg = AppBackground.get(bgId);
+    final useShopBg = bgId != 'bg_default';
 
     return Scaffold(
       backgroundColor: isDark ? preset.darkBackground : preset.background,
       floatingActionButton: floatingActionButton,
       body: AppDecorations.meshBackground(
-        isDark: isDark,
+        context: context,
         backgroundGradient: useShopBg ? bg.gradient : null,
         child: SafeArea(
           child: Column(
@@ -201,7 +230,7 @@ class AppSectionHeader extends StatelessWidget {
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 16, color: AppColors.primary),
+            Icon(icon, size: 16, color: context.brand),
             const SizedBox(width: 6),
           ],
           Text(label, style: AppTypography.labelBold(color: AppColors.onSurfaceVariant, size: 13)),
@@ -228,20 +257,19 @@ class AppGlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final skin = context.watch<ShopProvider>().activeCardStyle;
+    final skinId = context.select<ShopProvider, String>((s) => s.activeSkinId);
+    final skin = CardStyle.get(skinId);
     final effectiveRadius = skin.borderRadius > 0 ? skin.borderRadius : radius;
     final box = Container(
       padding: padding,
-      decoration: AppDecorations.glassCard(isDark: isDark, radius: effectiveRadius, skin: skin),
-      child: skin.glassEffect
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(effectiveRadius),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: child,
-              ),
-            )
-          : child,
+      decoration: AppDecorations.glassCard(
+        isDark: isDark,
+        radius: effectiveRadius,
+        skin: skin,
+        brand: context.brand,
+        surface: context.panel,
+      ),
+      child: child,
     );
     if (onTap == null) return box;
     return Material(
@@ -271,7 +299,7 @@ class AppSettingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = iconColor ?? AppColors.primary;
+    final color = iconColor ?? context.brand;
     return AppGlassCard(
       padding: EdgeInsets.zero,
       radius: 18,
@@ -320,10 +348,10 @@ class AppEmptyState extends StatelessWidget {
               width: 88,
               height: 88,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: context.brand.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(28),
               ),
-              child: Icon(icon, size: 44, color: AppColors.primary.withValues(alpha: 0.5)),
+              child: Icon(icon, size: 44, color: context.brand.withValues(alpha: 0.5)),
             ),
             const SizedBox(height: 16),
             Text(message, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 14)),
@@ -392,14 +420,13 @@ class AppFormScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final shop = context.watch<ShopProvider>();
-    final useShopBg = shop.activeBackgroundId != 'bg_default';
+    final bgId = context.select<ShopProvider, String>((s) => s.activeBackgroundId);
+    final useShopBg = bgId != 'bg_default';
 
     return Scaffold(
       body: AppDecorations.meshBackground(
-        isDark: isDark,
-        backgroundGradient: useShopBg ? shop.activeBackground.gradient : null,
+        context: context,
+        backgroundGradient: useShopBg ? AppBackground.get(bgId).gradient : null,
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

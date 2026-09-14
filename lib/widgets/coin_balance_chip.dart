@@ -12,7 +12,8 @@ class CoinBalanceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shop = context.watch<ShopProvider>();
+    final coins = context.select<ShopProvider, int>((s) => s.coins);
+    final canBuy = context.select<ShopProvider, bool>((s) => !s.isBillingDisabled);
 
     return Material(
       color: Colors.transparent,
@@ -37,10 +38,10 @@ class CoinBalanceChip extends StatelessWidget {
               const Icon(Icons.star_rounded, color: AppColors.coin, size: 18),
               const SizedBox(width: 5),
               Text(
-                '${shop.coins}',
+                '$coins',
                 style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.coin, fontSize: 14),
               ),
-              if (!shop.isBillingDisabled) ...[
+              if (canBuy) ...[
                 const SizedBox(width: 4),
                 Icon(Icons.add_circle_outline, color: AppColors.coin.withValues(alpha: 0.85), size: 16),
               ],

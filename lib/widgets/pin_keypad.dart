@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_colors.dart';
+import 'app_ui.dart';
 
 const int kPinLength = 4;
 
@@ -144,8 +145,7 @@ class PinEntryShell extends StatelessWidget {
     final compact = MediaQuery.sizeOf(context).height < 700;
 
     return Scaffold(
-      body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: AppColors.splashGradient),
+      body: ThemedImmersiveBackground(
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

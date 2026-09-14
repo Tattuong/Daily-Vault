@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../widgets/app_ui.dart';
 
+final Map<String, ThemeData> _themeCache = {};
+
 class AppThemePreset {
   final String id;
   final Color primary;
@@ -26,18 +28,24 @@ class AppThemePreset {
     required this.balanceGradient,
   });
 
-  ThemeData lightTheme() => _buildTheme(
+  ThemeData lightTheme() => _themeCache['$id-light'] ??= _buildTheme(
         brightness: Brightness.light,
         scaffold: background,
         surfaceColor: surface,
         onSurface: AppColors.onSurface,
       );
 
-  ThemeData darkTheme() => _buildTheme(
+  ThemeData darkTheme() => _themeCache['$id-dark'] ??= _buildTheme(
         brightness: Brightness.dark,
         scaffold: darkBackground,
         surfaceColor: darkSurface,
         onSurface: const Color(0xFFF1F5F9),
+      );
+
+  LinearGradient get lockGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [darkBackground, primary, primaryLight],
       );
 
   ThemeData _buildTheme({
@@ -47,27 +55,25 @@ class AppThemePreset {
     required Color onSurface,
   }) {
     final isDark = brightness == Brightness.dark;
+    final brand = isDark ? primaryLight : primary;
+    final scheme = ColorScheme.fromSeed(
+      seedColor: primary,
+      brightness: brightness,
+    ).copyWith(
+      primary: brand,
+      secondary: isDark ? primary : primaryLight,
+      tertiary: AppColors.accent,
+      surface: surfaceColor,
+      onSurface: onSurface,
+      onPrimary: AppColors.onPrimary,
+    );
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
+      primaryColor: brand,
+      canvasColor: scaffold,
       scaffoldBackgroundColor: scaffold,
-      colorScheme: isDark
-          ? ColorScheme.dark(
-              primary: primaryLight,
-              secondary: primary,
-              tertiary: AppColors.accent,
-              surface: surfaceColor,
-              onSurface: onSurface,
-              onPrimary: AppColors.onPrimary,
-            )
-          : ColorScheme.light(
-              primary: primary,
-              secondary: primaryLight,
-              tertiary: AppColors.accent,
-              surface: surfaceColor,
-              onPrimary: AppColors.onPrimary,
-              onSurface: onSurface,
-            ),
+      colorScheme: scheme,
       textTheme: AppTypography.textTheme(brightness),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -77,7 +83,7 @@ class AppThemePreset {
         iconTheme: IconThemeData(color: onSurface),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: isDark ? primaryLight : primary,
+        backgroundColor: brand,
         foregroundColor: AppColors.onPrimary,
         elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -88,25 +94,38 @@ class AppThemePreset {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: primary.withValues(alpha: 0.08)),
+          borderSide: BorderSide(color: brand.withValues(alpha: 0.08)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: primary, width: 1.5),
+          borderSide: BorderSide(color: brand, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        prefixIconColor: brand,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: isDark ? primaryLight : primary,
+          backgroundColor: brand,
           foregroundColor: AppColors.onPrimary,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? brand : null,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? brand.withValues(alpha: 0.45) : null,
+        ),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: brand),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(foregroundColor: onSurface),
+      ),
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        side: BorderSide(color: primary.withValues(alpha: 0.15)),
+        side: BorderSide(color: brand.withValues(alpha: 0.15)),
       ),
     );
   }

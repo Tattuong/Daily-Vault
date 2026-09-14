@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
+import '../../models/app_theme_preset.dart';
 import '../../models/vault_item.dart';
 import '../../providers/shop_provider.dart';
 import '../../providers/vault_provider.dart';
@@ -48,10 +49,11 @@ class VaultListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vault = context.watch<VaultProvider>();
-    final shop = context.watch<ShopProvider>();
+    final hasUnlimited = context.select<ShopProvider, bool>((s) => s.hasUnlimitedItems);
+    final bgId = context.select<ShopProvider, String>((s) => s.activeBackgroundId);
     final items = _items(vault);
     final limit = vault.limitFor(type);
-    final atLimit = !shop.hasUnlimitedItems && items.length >= limit;
+    final atLimit = !hasUnlimited && items.length >= limit;
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
@@ -60,8 +62,8 @@ class VaultListScreen extends StatelessWidget {
         label: Text(AppStrings.t(context, 'addItem')),
       ),
       body: AppDecorations.meshBackground(
-        isDark: Theme.of(context).brightness == Brightness.dark,
-        backgroundGradient: shop.activeBackgroundId != 'bg_default' ? shop.activeBackground.gradient : null,
+        context: context,
+        backgroundGradient: bgId != 'bg_default' ? AppBackground.get(bgId).gradient : null,
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

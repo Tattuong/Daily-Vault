@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_colors.dart';
@@ -53,7 +51,7 @@ class MainShellState extends State<MainShell> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final preset = Theme.of(context).colorScheme;
+    final primary = Theme.of(context).colorScheme.primary;
     final screens = [
       const VaultHomeScreen(),
       const BrowseScreen(),
@@ -62,62 +60,58 @@ class MainShellState extends State<MainShell> with WidgetsBindingObserver {
     ];
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
+      backgroundColor: context.canvasBg,
       body: IndexedStack(index: _index, children: screens),
       extendBody: true,
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: (isDark ? AppColors.darkSurface : Colors.white).withValues(alpha: 0.92),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: preset.primary.withValues(alpha: 0.1)),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: isDark ? 0.2 : 0.1),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: context.panel,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: primary.withValues(alpha: 0.1)),
+            boxShadow: [
+              BoxShadow(
+                color: context.brand.withValues(alpha: isDark ? 0.2 : 0.1),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-              child: Row(
-                children: [
-                  _NavItem(
-                    icon: Icons.home_outlined,
-                    activeIcon: Icons.home_rounded,
-                    label: AppStrings.t(context, 'navHome'),
-                    active: _index == 0,
-                    onTap: () => setState(() => _index = 0),
-                  ),
-                  _NavItem(
-                    icon: Icons.inventory_2_outlined,
-                    activeIcon: Icons.inventory_2_rounded,
-                    label: AppStrings.t(context, 'navBrowse'),
-                    active: _index == 1,
-                    onTap: () => setState(() => _index = 1),
-                  ),
-                  _NavItem(
-                    icon: Icons.stars_outlined,
-                    activeIcon: Icons.stars_rounded,
-                    label: AppStrings.t(context, 'navShop'),
-                    active: _index == 2,
-                    onTap: () => setState(() => _index = 2),
-                    accent: AppColors.coin,
-                  ),
-                  _NavItem(
-                    icon: Icons.settings_outlined,
-                    activeIcon: Icons.settings_rounded,
-                    label: AppStrings.t(context, 'navSettings'),
-                    active: _index == 3,
-                    onTap: () => setState(() => _index = 3),
-                  ),
-                ],
-              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            child: Row(
+              children: [
+                _NavItem(
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home_rounded,
+                  label: AppStrings.t(context, 'navHome'),
+                  active: _index == 0,
+                  onTap: () => setState(() => _index = 0),
+                ),
+                _NavItem(
+                  icon: Icons.inventory_2_outlined,
+                  activeIcon: Icons.inventory_2_rounded,
+                  label: AppStrings.t(context, 'navBrowse'),
+                  active: _index == 1,
+                  onTap: () => setState(() => _index = 1),
+                ),
+                _NavItem(
+                  icon: Icons.stars_outlined,
+                  activeIcon: Icons.stars_rounded,
+                  label: AppStrings.t(context, 'navShop'),
+                  active: _index == 2,
+                  onTap: () => setState(() => _index = 2),
+                  accent: AppColors.coin,
+                ),
+                _NavItem(
+                  icon: Icons.settings_outlined,
+                  activeIcon: Icons.settings_rounded,
+                  label: AppStrings.t(context, 'navSettings'),
+                  active: _index == 3,
+                  onTap: () => setState(() => _index = 3),
+                ),
+              ],
             ),
           ),
         ),
@@ -152,7 +146,7 @@ class _NavItem extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
+          duration: const Duration(milliseconds: 180),
           curve: Curves.easeOutCubic,
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(

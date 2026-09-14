@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_strings.dart';
+import '../providers/account_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/shop_provider.dart';
 import '../providers/vault_provider.dart';
@@ -33,8 +34,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   Future<void> _bootstrap() async {
     final shop = context.read<ShopProvider>();
-    await shop.init();
-    await context.read<VaultProvider>().load();
+    await Future.wait([
+      shop.init(),
+      context.read<AccountProvider>().restore(),
+      context.read<VaultProvider>().load(),
+    ]);
     if (!mounted) return;
 
     final prefs = await SharedPreferences.getInstance();
@@ -74,13 +78,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: AppColors.splashGradient),
+      body: ThemedImmersiveBackground(
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Positioned(top: -80, right: -60, child: _orb(AppColors.accent.withValues(alpha: 0.25), 240)),
-            Positioned(bottom: -40, left: -80, child: _orb(AppColors.accentAlt.withValues(alpha: 0.2), 200)),
+            Positioned(top: -80, right: -60, child: _orb(context.brand.withValues(alpha: 0.28), 240)),
+            Positioned(bottom: -40, left: -80, child: _orb(Theme.of(context).colorScheme.secondary.withValues(alpha: 0.22), 200)),
             SafeArea(
               child: FadeTransition(
                 opacity: _fade,

@@ -12,8 +12,9 @@ class AdBannerPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shop = context.watch<ShopProvider>();
-    if (shop.hasRemoveAds) return const SizedBox.shrink();
+    if (context.select<ShopProvider, bool>((s) => s.hasRemoveAds)) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
