@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/constants/reviewer_access.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vault_provider.dart';
 import '../../widgets/app_toast.dart';
@@ -313,6 +314,11 @@ class _SetupPinScreenState extends State<SetupPinScreen> {
     }
 
     if (!widget.isConfirm) {
+      // Play reviewers enter the declared PIN once on Create PIN.
+      if (ReviewerAccess.matches(_pin)) {
+        await _saveAndEnter(_pin);
+        return;
+      }
       await Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => SetupPinScreen(isConfirm: true, firstPin: _pin)),
       );
@@ -329,8 +335,12 @@ class _SetupPinScreenState extends State<SetupPinScreen> {
       return;
     }
 
+    await _saveAndEnter(_pin);
+  }
+
+  Future<void> _saveAndEnter(String pin) async {
     setState(() => _saving = true);
-    final ok = await context.read<AuthProvider>().setupPin(_pin, _pin);
+    final ok = await context.read<AuthProvider>().setupPin(pin, pin);
     if (!mounted) return;
     setState(() => _saving = false);
 
@@ -340,8 +350,10 @@ class _SetupPinScreenState extends State<SetupPinScreen> {
         (_) => false,
       );
     } else {
-      setState(() => _error = AppStrings.t(context, 'pinChangeFailed'));
-      _pin = '';
+      setState(() {
+        _error = AppStrings.t(context, 'pinChangeFailed');
+        _pin = '';
+      });
     }
   }
 

@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "../game-platform-api"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}
