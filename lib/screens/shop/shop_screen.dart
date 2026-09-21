@@ -98,7 +98,7 @@ class ShopScreenState extends State<ShopScreen> {
           ),
         ),
       ],
-      const SliverToBoxAdapter(child: SizedBox(height: 100)),
+      const SliverToBoxAdapter(child: SizedBox(height: 156)),
     ];
   }
 
@@ -158,7 +158,7 @@ class ShopScreenState extends State<ShopScreen> {
             _gridSliver(items)
           else
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 156),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (_, i) => Padding(

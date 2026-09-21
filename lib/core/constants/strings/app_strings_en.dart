@@ -208,7 +208,7 @@ const Map<String, String> appStringsEn = {
   'restorePurchases': 'Restore purchases',
   'privacyTitle': 'Privacy Policy',
   'privacyIntro': 'Daily Vault stores passwords, notes, documents, stars and shop items locally on your device by default. Login is optional. We do not sell your personal information.',
-  'privacyData': 'Your vault items never leave this device unless you explicitly export or share them. If you create an account, we store your email, nickname and purchase history on our server so pack purchases can be linked to you. We do not upload vault contents or your star balance.\n\nInternet is also used to fetch IAP configuration and process Google Play purchases. Purchases are handled by Google Play Billing. We do not store payment card information.',
+  'privacyData': 'Your vault items never leave this device unless you explicitly export or share them. If you create an account, we store your email, nickname and purchase history on our server so pack purchases can be linked to you. We do not upload vault contents or your star balance.\n\nInternet is also used to fetch IAP configuration, process Google Play purchases, and show ads via Google AdMob. Purchases are handled by Google Play Billing. We do not store payment card information. You can remove ads from the Shop.',
   'privacyContact': 'Contact: support@dailyvault.app',
   'logNotes': 'Notes',
   'yourWallet': 'Your wallet',

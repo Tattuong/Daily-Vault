@@ -208,7 +208,7 @@ const Map<String, String> appStringsVi = {
   'restorePurchases': 'Khôi phục mua hàng',
   'privacyTitle': 'Chính sách bảo mật',
   'privacyIntro': 'Daily Vault mặc định lưu mật khẩu, ghi chú, tài liệu, sao và vật phẩm cửa hàng ngay trên máy. Đăng nhập không bắt buộc. Chúng tôi không bán thông tin cá nhân.',
-  'privacyData': 'Nội dung kho không rời thiết bị trừ khi bạn xuất hoặc chia sẻ. Nếu tạo tài khoản, chúng tôi lưu email, biệt danh và lịch sử mua pack trên server để gắn giao dịch với bạn. Chúng tôi không tải nội dung kho hay số sao lên.\n\nInternet còn dùng để lấy cấu hình IAP và xử lý mua hàng Google Play. Giao dịch do Google Play Billing xử lý. Chúng tôi không lưu thông tin thẻ.',
+  'privacyData': 'Nội dung kho không rời thiết bị trừ khi bạn xuất hoặc chia sẻ. Nếu tạo tài khoản, chúng tôi lưu email, biệt danh và lịch sử mua pack trên server để gắn giao dịch với bạn. Chúng tôi không tải nội dung kho hay số sao lên.\n\nInternet còn dùng để lấy cấu hình IAP, xử lý mua hàng Google Play và hiển thị quảng cáo qua Google AdMob. Giao dịch do Google Play Billing xử lý. Chúng tôi không lưu thông tin thẻ. Bạn có thể gỡ quảng cáo trong Cửa hàng.',
   'privacyContact': 'Liên hệ: support@dailyvault.app',
   'logNotes': 'Ghi chú',
   'yourWallet': 'Ví của bạn',

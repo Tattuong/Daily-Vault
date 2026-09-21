@@ -180,7 +180,7 @@ class AppPageScaffold extends StatelessWidget {
               ),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 156),
                   children: children,
                 ),
               ),

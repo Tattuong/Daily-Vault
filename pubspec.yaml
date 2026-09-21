@@ -3,7 +3,7 @@ description: Daily Vault - Secure personal storage for passwords, notes & docume
 
 publish_to: "none"
 
-version: 1.0.4+5
+version: 1.0.5+6
 
 environment:
   sdk: ">=3.4.3 <4.0.0"
@@ -30,6 +30,7 @@ dependencies:
   path_provider: ^2.1.5
   file_picker: ^8.1.7
   crypto: ^3.0.6
+  google_mobile_ads: ^5.3.1
 
 dev_dependencies:
   flutter_test:

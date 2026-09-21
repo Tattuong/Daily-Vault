@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
+import 'core/constants/ad_constants.dart';
 import 'core/navigation/app_navigator.dart';
+import 'core/services/ad_service.dart';
 import 'core/services/hive_service.dart';
 import 'core/services/storage_service.dart';
 import 'models/app_theme_preset.dart';
@@ -35,6 +39,9 @@ Future<void> main() async {
   await appAuthProvider.init();
 
   runApp(const DailyVaultApp());
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (AdConstants.isConfigured) unawaited(AdService.init());
+  });
 }
 
 class DailyVaultApp extends StatelessWidget {
