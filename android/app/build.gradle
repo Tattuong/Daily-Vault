@@ -32,7 +32,8 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.dailyvaultmng.dailyvault"
     compileSdk = 36
-    ndkVersion = "27.0.12077973"
+    // NDK r28 aligns arm64/x86_64 native libs to 16 KB pages (Play requirement).
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -65,6 +66,12 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.release
+        }
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 }

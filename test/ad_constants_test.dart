@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('uses real AdMob app and banner units, not Google sample IDs', () {
-    expect(AdConstants.androidAppId, 'ca-app-pub-1023100218618748~96265550299');
+    expect(AdConstants.androidAppId, 'ca-app-pub-1023100218618748~9626555029');
     expect(AdConstants.androidBannerId, 'ca-app-pub-1023100218618748/9955520215');
     expect(AdConstants.androidAppId.contains('3940256099942544'), isFalse);
     expect(AdConstants.androidBannerId.contains('3940256099942544'), isFalse);
